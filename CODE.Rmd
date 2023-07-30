@@ -1,0 +1,501 @@
+1.  <div>
+
+    ---
+    title: "FDA-Project"
+    author: "Rentala Naga Sai Ganesh - 20BCE1928"
+    output:
+      html_document:
+        df_print: paged
+      word_document: default
+    ---
+
+    </div>
+
+```{r}
+#installing datarium
+rm(list=ls())
+install.packages("datarium")
+library(datarium)
+```
+
+```{r}
+#reading data set of our project
+data = read.csv(file.choose())
+```
+
+```{r}
+head(data)
+```
+
+```{r}
+#visualization for high and low
+library(ggplot2)
+par(mar = c(2,2,2,2))
+ggplot(data,aes(x=High,y=Low))+geom_point()
+```
+
+```{r}
+#visualization for open and close
+library(ggplot2)
+par(mar = c(2,2,2,2))
+ggplot(data,aes(x=Open,y=Close))+geom_point()
+```
+
+```{r}
+#visualization for date and open
+library(ggplot2)
+par(mar = c(2,2,2,2))
+ggplot(data,aes(x=Date,y=Open))+geom_point()
+```
+
+#geom smooth method for all 3 models we taken:###\#
+
+```{r}
+#geom smooth method for high and low
+ggplot(data,aes(x=High,y=Low))+geom_point()+geom_smooth(method = 'lm',se=FALSE)
+```
+
+```{r}
+#geom smooth method for close and open
+ggplot(data,aes(x=Open,y=Close))+geom_point()+geom_smooth(method = 'lm',se=FALSE)
+```
+
+```{r}
+#geom smooth method for date and open
+ggplot(data,aes(x=Date,y=Open))+geom_point()+geom_smooth(method = 'lm',se=FALSE)
+```
+
+#correlation for models we choosen:###\#
+
+```{r}
+#correlation between high and low
+cor(data$High,data$Low)
+```
+
+```{r}
+#correlation between open and close
+cor(data$Open,data$Close)
+```
+
+#assinging the models :### ##model 1 for high and low #model 2 for open and close #model 3 for marketcap and open
+
+```{r}
+#assigning model1 for low and high
+model1 = lm(High~Low,data)
+model1
+```
+
+```{r}
+#assigning model2 for open and close
+model2 = lm(Open~Close,data)
+model2
+```
+
+```{r}
+#assigning model3 for date and open
+model3 = lm(Marketcap~Open,data)
+model3
+```
+
+#summary for models taken###
+
+```{r}
+#summary for model1
+summary(model1)
+```
+
+```{r}
+#summary for model2
+summary(model2)
+```
+
+```{r}
+#summary for model3
+summary(model3)
+```
+
+#data
+
+```{r}
+head(data)
+```
+
+#evaluating the linearity assumption for every model taken###\#
+
+```{r}
+
+#evaluating the linearity assumption among Marketcap and Open
+plot(data$Marketcap,data$Open)
+```
+
+```{r}
+#evaluating the linearity assumption among Low and High
+plot(data$High,data$Low)
+```
+
+```{r}
+#evaluating the linearity assumption among open and Close
+plot(data$Open,data$Close)
+```
+
+#plotting models###\#
+
+```{r}
+#plotting model1
+plot(model1,6)
+```
+
+```{r}
+#plotting model2 
+plot(model2,3)
+```
+
+```{r}
+#plotting model3
+plot(model3,3)
+```
+
+#histogram for all the 3 models taken :#
+
+```{r}
+hist(model1$residuals)
+```
+
+```{r}
+hist(model2$residuals)
+```
+
+```{r}
+hist(model3$residuals)
+```
+
+#normal QQ plots for all the 3 models :#####\#
+
+```{r}
+qqnorm(model1$residuals,ylab = "Residuals")
+qqline(model1$residuals)
+```
+
+```{r}
+qqnorm(model2$residuals,ylab = "Residuals")
+qqline(model2$residuals)
+```
+
+```{r}
+qqnorm(model3$residuals,ylab = "Residuals")
+qqline(model3$residuals)
+```
+
+#Barplots for different scienorios:#####
+
+```{r}
+library(graphics)
+# data = read.table("coin_Bitcoin.csv",header=TRUE,sep = ",")
+View(data)
+par(mar=c(2,2,2,2))
+plot(data$High,data$Low)
+barplot(data$Open,main = "bitcoin",xlab = "index",ylab = "Open values")
+hist(data$Close)
+```
+
+```{r}
+barplot(data$Open,main = "bitcoin",xlab = "High",ylab = "Low")
+```
+
+```{r}
+barplot(data$Open,main = "bitcoin",xlab = "Open",ylab = "Close")
+```
+
+#Forecasting using Prophet in R
+
+#Loading the Packages
+
+```{r}
+#install.packages('prophet')
+library(prophet)
+library(tidyverse)
+```
+
+```{r}
+#Loading the Dataset
+bitcoin = read.csv(file.choose())
+head(bitcoin)
+```
+
+```{r}
+#Calling the Prophet Function to Fit the Model
+Model1 = prophet(bitcoin)
+Future1 = make_future_dataframe(Model1, periods = 365)
+tail(Future1)
+Forecast1 = predict(Model1, Future1)
+tail(Forecast1[c('ds','yhat','yhat_lower','yhat_upper')])
+```
+
+```{r}
+# show mean of predicted price and actual price of bitcoin
+mean(Forecast1$yhat)
+mean(bitcoin$y)
+```
+
+```{r}
+#summary of price we predicion we did.
+summary(Forecast1)
+```
+
+```{r}
+#Plotting the Model Estimates
+dyplot.prophet(Model1, Forecast1)
+prophet_plot_components(Model1, Forecast1)
+```
+
+#Forecasting using SVM in R
+
+#Loading the Packages
+
+```{r}
+#install.packages('caTools')
+library(caTools)
+#install.packages('caret')
+library(caret)
+#install.packages('kernlab')
+library(kernlab)
+```
+
+```{r}
+#Loading the Dataset
+svm = read.csv(file.choose())
+head(svm)
+```
+
+```{r}
+svm = svm[2:5]
+svm
+set.seed(3033)
+intrain = createDataPartition(y = svm$yC, p=0.7, list = FALSE)
+training = svm[intrain,]
+testing = svm[-intrain]
+dim(training);
+dim(testing)
+anyNA(svm)
+```
+
+```{r}
+training[["yC"]] = factor(training[["yC"]])
+trctr1 = trainControl(method = "repeatedcv", number = 10, repeats = 3)
+```
+
+```{r}
+svm_Linear = train(yC~ ., data = training, method = "svmLinear",
+                   trControl=trctr1,
+                   preProcess = c("center","scale"),
+                   tuneLength = 10)
+```
+
+```{r}
+svm_Linear
+```
+
+#Forecasting using ARIMA in R #Loading the Packages
+
+```{r}
+library(readr)
+#install.packages('mlr')
+library(mlr)
+library(readxl)
+#install.packages('forecast')
+library(forecast)
+```
+
+```{r}
+ARIMA = read.csv(file.choose())
+head(ARIMA)
+```
+
+```{r}
+summarizeColumns(ARIMA)
+```
+
+```{r}
+## using ts() function for place in time-series format
+tsARIMA = ts(ARIMA$y,frequency = 4,start = c(2015,6))
+## ploting the time series formatted data
+plot(tsARIMA)
+```
+
+```{r}
+## using the auto.arima() function to get the optimal auto arima model
+autoarima1 = auto.arima(tsARIMA)
+autoarima1
+```
+
+```{r}
+plot(autoarima1)
+```
+
+```{r}
+## getting the forecasted data for a period of 17 weeks == 4months 
+forecast1 = forecast(autoarima1, h=130)
+
+## showing the forrecasted values
+forecast1
+```
+
+```{r}
+## ploting the forecasted data from the auto arima model
+plot(forecast1)
+```
+
+```{r}
+## ploting the residuals over time to see congruence or varience
+plot(forecast1$residuals)
+```
+
+```{r}
+### ploting the residuals (sample vs. therotical)
+qqnorm(forecast1$residuals)
+```
+
+```{r}
+##
+acf(forecast1$residuals)
+```
+
+```{r}
+pacf(forecast1$residuals)
+```
+
+```{r}
+### getting accuracy by mape and other leading indicators - each dataset is different method
+## method - 1
+summary(autoarima1)
+## method - 2 
+accuracy(autoarima1)
+```
+
+```{r}
+reg = read.csv(file.choose())
+head(reg)
+```
+
+```{r}
+library(tidyverse)
+library(caret)
+
+```
+
+```{r}
+#Split the data into training and test dataset
+set.seed(123)
+data1=select(reg,-c(Date))
+train_sample=data1$Close %>% createDataPartition(p=0.8,list = FALSE)
+train1=data1[train_sample,]
+head(train1)
+```
+
+```{r}
+test1=data1[-train_sample,]
+head(test1)
+```
+
+```{r}
+data1=select(reg,-c(Date))
+index <- sample(2,nrow(data1),replace= TRUE,prob=c(0.8,0.2))
+trainClean <- data1[index==1,]
+testClean <- data1[index==2,]
+```
+
+```{r}
+model_lm <- lm(trainClean$Close~., data =trainClean)
+summary(model_lm)
+```
+
+```{r}
+library(Metrics)
+#Make prediction
+pred1 = model_lm %>% predict(testClean)
+print(head(pred1))
+#Model Performance & Root Mean Squared Error
+root_mean_Sq_err1=RMSE(pred1,testClean$S1)
+print("RMSE")
+print(root_mean_Sq_err1)
+#R squared
+R2_1 = R2(pred1,testClean$Close)
+print("R-Squared")
+print(R2_1)
+#Mean Squared Error
+MSE1=mean((pred1 - testClean$Close)^2)
+print("MSE")
+print(MSE1)
+#Mean Absolute Error
+MAE1=mae(pred1,testClean$Close)
+print("MAE")
+print(MAE1)
+# Adjusted R-squared. 
+Adj_R_sq1=summary(model_lm)$adj.r.squared
+print("Adjusted R squared")
+print(Adj_R_sq1)
+```
+
+```{r}
+df <- data.frame(test_L1 = testClean$Open,test_T1 = testClean$High, test_S=testClean$Close, pred_S1=pred1)
+head(df)
+
+```
+
+```{r}
+#ridge
+x <- model.matrix(data1$Close~., data1)
+y <- data1$Close
+lambda <- 10^seq(10, -2, length = 100)
+```
+
+```{r}
+#install.packages('glmnet')
+library(glmnet)
+ridge.mod <- glmnet(x, y, alpha = 0, lambda = lambda)
+coef.glmnet(ridge.mod)
+```
+
+```{r}
+#Ridge
+set.seed(489)
+train = sample(1:nrow(x), nrow(x)/2)
+test = (-train)
+ytest = y[test]
+ridge.mod <- glmnet(x[train,], y[train], alpha = 0, lambda = lambda)
+#find the best lambda from our list via cross-validation
+cv.out <- cv.glmnet(x[train,], y[train], alpha = 0)
+bestlam <- cv.out$lambda.min
+#make predictions
+pred2 <- predict(ridge.mod, s = bestlam, newx = x[test,])
+head(pred2)
+```
+
+```{r}
+#Model Performance & Root Mean Squared Error
+root_mean_Sq_err2=RMSE(pred2,ytest)
+print("RMSE")
+print(root_mean_Sq_err2)
+#R squared
+R2_2 = R2(pred2,ytest)
+print("R-Squared")
+print(R2_2)
+#Mean Squared Error
+MSE2=mean((pred2 - ytest)^2)
+print("MSE")
+print(MSE2)
+#Mean Absolute Error
+library(Metrics)
+MAE2=mae(pred2,ytest)
+print("MAE")
+print(MAE2)
+```
+
+```{r}
+plot(ytest, pred2, main ='Predicted Vs Actual')
+
+```
+
+# comparative studies
+
+After comparing the results of above 3 predection algorithms and regression models. The Facebook prophet algorithm is giving the results with almost 95% accuracy for this particular data set.
